@@ -1,4 +1,8 @@
 <?php
+session_start();
+if (isset($_SESSION["ses_username"])) {
+	header("location: dashboard.php");
+}
 include "inc/koneksi.php";
    
 ?>
