@@ -71,6 +71,12 @@ if (strlen($tambah) == 1){
 							<small class="text-muted">Format yang didukung: JPG, PNG, GIF. Maksimal 2MB</small>
 						</div>
 
+						<div class="form-group">
+							<label>File Buku (PDF)</label>
+							<input type="file" name="pdf_file" id="pdf_file" class="form-control" accept="application/pdf">
+							<small class="text-muted">Format: PDF. Maksimal 10MB</small>
+						</div>
+
 					</div>
 					<!-- /.box-body -->
 
@@ -125,14 +131,41 @@ if (strlen($tambah) == 1){
                 echo "<script>console.log('File upload error: " . $upload_error . "');</script>";
             }
         }
+
+        // Handle PDF upload
+        $pdf_file = '';
+        if (isset($_FILES['pdf_file']) && $_FILES['pdf_file']['error'] == 0) {
+            $pdf_extension = strtolower(pathinfo($_FILES['pdf_file']['name'], PATHINFO_EXTENSION));
+            if ($pdf_extension === 'pdf') {
+                if ($_FILES['pdf_file']['size'] <= 10 * 1024 * 1024) { // 10MB limit
+                    $pdf_upload_dir = dirname(__DIR__) . '/uploads/book_pdfs/';
+                    if (!file_exists($pdf_upload_dir)) {
+                        mkdir($pdf_upload_dir, 0755, true);
+                    }
+                    $pdf_file_name = $_POST['id_buku'] . '_' . time() . '.pdf';
+                    $pdf_upload_path = $pdf_upload_dir . $pdf_file_name;
+                    if (move_uploaded_file($_FILES['pdf_file']['tmp_name'], $pdf_upload_path)) {
+                        $pdf_file = $pdf_file_name;
+                    } else {
+                        $upload_error = $_FILES['pdf_file']['error'];
+                        echo "<script>console.log('PDF upload failed. Error code: " . $upload_error . "');</script>";
+                    }
+                } else {
+                    echo "<script>console.log('PDF too large. Max size: 10MB');</script>";
+                }
+            } else {
+                echo "<script>console.log('Invalid PDF type. Only .pdf allowed');</script>";
+            }
+        }
     
-        $sql_simpan = "INSERT INTO tb_buku (id_buku,judul_buku,pengarang,penerbit,th_terbit,cover_image) VALUES (
+        $sql_simpan = "INSERT INTO tb_buku (id_buku,judul_buku,pengarang,penerbit,th_terbit,cover_image,pdf_file) VALUES (
            '".$_POST['id_buku']."',
           '".$_POST['judul_buku']."',
           '".$_POST['pengarang']."',
           '".$_POST['penerbit']."',
           '".$_POST['th_terbit']."',
-          '".$cover_image."')";
+          '".$cover_image."',
+          '".$pdf_file."')";
         $query_simpan = mysqli_query($koneksi, $sql_simpan);
         mysqli_close($koneksi);
 

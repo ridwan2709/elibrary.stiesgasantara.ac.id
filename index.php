@@ -31,7 +31,16 @@ include 'template/header.php';
                  while ($data = $sql->fetch_assoc()) {
                  ?>
                 <div class="book-card bg-white rounded-lg shadow-md hover:shadow-xl transition duration-300 p-4 flex flex-col items-center text-center" data-title="<?php echo $data['judul_buku']; ?>">
-                    <img src="<?php echo 'admin/uploads/book_covers/'.$data['cover_image']; ?>" alt="Cover Buku" class="w-2/3 md:w-full rounded-md shadow-lg mb-4">
+                    <?php 
+                    
+                    if ($data['cover_image']) { ?>
+                        <img src="<?php echo 'admin/uploads/book_covers/'.$data['cover_image']; ?>" alt="Cover Buku" class="w-2/3 md:w-full rounded-md shadow-lg mb-4">
+                    
+                    <?php } else { ?>
+                        <div style="width: 195px; height: 280px; background-color: #f5f5f5; border: 1px solid #ddd; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #999;">
+                            No Image
+                        </div>
+                    <?php } ?>
                     <h3 class="font-semibold text-sm md:text-base text-gray-800 line-clamp-2"><?php echo $data['judul_buku']; ?></h3>
                     <p class="text-xs text-gray-500 mt-1">oleh <?php echo $data['pengarang']; ?></p>
                    

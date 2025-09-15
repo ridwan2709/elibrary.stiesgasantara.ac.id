@@ -31,6 +31,7 @@
 							<th>Pengarang</th>
 							<th>Penerbit</th>
 							<th>Tahun</th>
+							<th>PDF</th>
 							<th>Kelola</th>
 						</tr>
 					</thead>
@@ -48,7 +49,7 @@
 							</td>
 							<td>
 								<?php if (!empty($data['cover_image'])): ?>
-									<img src="/admin/uploads/book_covers/<?php echo $data['cover_image']; ?>" 
+									<img src="admin/uploads/book_covers/<?php echo $data['cover_image']; ?>" 
 										 alt="Cover <?php echo $data['judul_buku']; ?>" 
 										 style="width: 50px; height: 70px; object-fit: cover; border: 1px solid #ddd;">
 								<?php else: ?>
@@ -71,6 +72,15 @@
 							</td>
 							<td>
 								<?php echo $data['th_terbit']; ?>
+							</td>
+							<td>
+								<?php if (!empty($data['pdf_file'])): ?>
+									<a href="admin/uploads/book_pdfs/<?php echo $data['pdf_file']; ?>" target="_blank" class="btn btn-info btn-sm" title="Lihat/Unduh PDF">
+										<i class="glyphicon glyphicon-file"></i>
+									</a>
+								<?php else: ?>
+									<span class="text-muted">-</span>
+								<?php endif; ?>
 							</td>
 
 							<td>
