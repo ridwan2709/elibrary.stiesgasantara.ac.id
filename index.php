@@ -34,8 +34,11 @@ include 'template/header.php';
                     <?php 
                     
                     if ($data['cover_image']) { ?>
-                        <img src="<?php echo 'admin/uploads/book_covers/'.$data['cover_image']; ?>" alt="Cover Buku" class="w-2/3 md:w-full rounded-md shadow-lg mb-4">
-                    
+                        <?php if($data['pdf_file']) { ?>
+                            <a target="_blank" href="<?= "admin/uploads/book_pdfs/".$data['pdf_file'] ?>"><img src="<?php echo 'admin/uploads/book_covers/'.$data['cover_image']; ?>" alt="Cover Buku" class="w-2/3 md:w-full rounded-md shadow-lg mb-4"></a>
+                        <?php }else{ ?>
+                           <button class="show-notif"><img src="<?php echo 'admin/uploads/book_covers/'.$data['cover_image']; ?>" alt="Cover Buku" class="w-2/3 md:w-full rounded-md shadow-lg mb-4"></button>
+                        <?php } ?>
                     <?php } else { ?>
                         <div style="width: 195px; height: 280px; background-color: #f5f5f5; border: 1px solid #ddd; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #999;">
                             No Image
@@ -120,6 +123,17 @@ include 'template/header.php';
             <div id="modal-content-summary" class="text-gray-700"></div>
         </div>
     </div>
+    <!-- Modal untuk Notif -->
+    <div id="notif-modal" class="modal hidden">
+        <div class="modal-content">
+            <button id="close-modal-btn-notif" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <h2 class="text-xl font-bold text-main mb-4" id="notif"></h2>
+        </div>
+    </div>
     <script>
         // Mengubah visibilitas menu mobile saat tombol hamburger diklik
         document.getElementById('menu-toggle').addEventListener('click', function() {
@@ -127,6 +141,14 @@ include 'template/header.php';
             menu.classList.toggle('hidden');
         });
 
+        // Logika untuk menampilkan notifikasi jika buku bukan pdf
+        document.querySelectorAll('.show-notif').forEach(button => {
+            button.addEventListener('click', function() {
+                const bookTitle = this.closest('.book-card').dataset.title;
+                document.getElementById('notif-modal').classList.remove('hidden');
+                document.getElementById('notif').textContent = `Untuk buku "${bookTitle}" Tidak ada file Pdf`;
+            });
+        });
         // Logika untuk menampilkan ringkasan buku
         document.querySelectorAll('.show-summary-btn').forEach(button => {
             button.addEventListener('click', function() {
@@ -138,6 +160,10 @@ include 'template/header.php';
         // Menutup modal ringkasan
         document.getElementById('close-modal-btn-summary').addEventListener('click', function() {
             document.getElementById('summary-modal').classList.add('hidden');
+        });
+        // Menutup modal notif
+        document.getElementById('close-modal-btn-notif').addEventListener('click', function() {
+            document.getElementById('notif-modal').classList.add('hidden');
         });
         
         const showSummary = async (bookTitle) => {
