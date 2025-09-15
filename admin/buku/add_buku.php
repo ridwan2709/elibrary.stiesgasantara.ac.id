@@ -101,7 +101,7 @@ if (strlen($tambah) == 1){
             
             if (in_array($file_extension, $allowed_types)) {
                 if ($_FILES['cover_image']['size'] <= 2 * 1024 * 1024) { // 2MB limit
-                    $upload_dir = dirname(__DIR__) . '../uploads/book_covers/';
+                    $upload_dir = dirname(__DIR__) . '/uploads/book_covers/';
                     
                     // Create directory if it doesn't exist
                     if (!file_exists($upload_dir)) {
