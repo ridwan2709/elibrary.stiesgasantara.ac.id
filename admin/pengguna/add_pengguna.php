@@ -72,10 +72,11 @@
 
     if (isset ($_POST['Simpan'])){
     //mulai proses simpan data
+        $hash = password_hash($_POST['password'], PASSWORD_DEFAULT);
         $sql_simpan = "INSERT INTO tb_pengguna (nama_pengguna,username,password,level) VALUES (
         '".$_POST['nama_pengguna']."',
         '".$_POST['username']."',
-        '".md5($_POST['password'])."',
+        '".$hash."',
         '".$_POST['level']."')";
         $query_simpan = mysqli_query($koneksi, $sql_simpan);
     if ($query_simpan) {

@@ -60,8 +60,8 @@
 						</div>
 
 						<div class="form-group">
-							<label for="exampleInputPassword1">Password</label>
-							<input type="password" class="form-control" name="password" id="pass" value="<?php echo $data_cek['password']; ?>"
+							<label for="exampleInputPassword1">Password (kosongkan jika tidak diubah)</label>
+							<input type="password" class="form-control" name="password" id="pass" value=""
 							/>
 							<input id="mybutton" onclick="change()" type="checkbox" class="form-checkbox"> Lihat Password
 						</div>
@@ -99,12 +99,15 @@
 
 if (isset ($_POST['Ubah'])){
     //mulai proses ubah
-    $sql_ubah = "UPDATE tb_pengguna SET
-        nama_pengguna='".$_POST['nama_pengguna']."',
-        username='".$_POST['username']."',
-        password='".md5($_POST['password'])."',
-        level='".$_POST['level']."'
-        WHERE id_pengguna='".$_POST['id_pengguna']."'";
+    $updates = [];
+    $updates[] = "nama_pengguna='".$_POST['nama_pengguna']."'";
+    $updates[] = "username='".$_POST['username']."'";
+    if (isset($_POST['password']) && $_POST['password'] !== '') {
+        $hash = password_hash($_POST['password'], PASSWORD_DEFAULT);
+        $updates[] = "password='".$hash."'";
+    }
+    $updates[] = "level='".$_POST['level']."'";
+    $sql_ubah = "UPDATE tb_pengguna SET ".implode(",", $updates)." WHERE id_pengguna='".$_POST['id_pengguna']."'";
     $query_ubah = mysqli_query($koneksi, $sql_ubah);
     if ($query_ubah) {
         echo "<script>

@@ -97,47 +97,70 @@ include "inc/koneksi.php";
 include "inc/koneksi.php";
 
 		if (isset($_POST['btnLogin'])) {  
-		
-		
+			$username = mysqli_real_escape_string($koneksi,$_POST['username']);
+			$plainPassword = $_POST['password'];
 
-			$username=mysqli_real_escape_string($koneksi,$_POST['username']);
-			$password=mysqli_real_escape_string($koneksi,md5($_POST['password']));
-
-
-		$sql_login = "SELECT * FROM tb_pengguna WHERE BINARY username='$username' AND password= '$password'";
-		$query_login = mysqli_query($koneksi, $sql_login);
-		$data_login = mysqli_fetch_array($query_login,MYSQLI_BOTH);
-		$jumlah_login = mysqli_num_rows($query_login);
+			// Fetch user by username only (case-sensitive)
+			$sql_login = "SELECT * FROM tb_pengguna WHERE BINARY username='$username' LIMIT 1";
+			$query_login = mysqli_query($koneksi, $sql_login);
+			$data_login = mysqli_fetch_array($query_login,MYSQLI_BOTH);
+			$jumlah_login = $data_login ? 1 : 0;
         
 
             if ($jumlah_login == 1 ){
-              session_start();
-              $_SESSION["ses_id"]=$data_login["id_pengguna"];
-              $_SESSION["ses_nama"]=$data_login["nama_pengguna"];
-              $_SESSION["ses_username"]=$data_login["username"];
-              $_SESSION["ses_password"]=$data_login["password"];
-              $_SESSION["ses_level"]=$data_login["level"];
+				$stored = $data_login["password"];
+
+				$authenticated = false;
+				// Prefer password_verify for hashed passwords
+				if (strlen($stored) > 0 && (strpos($stored, '$2y$') === 0 || strpos($stored, '$argon2') === 0)) {
+					if (password_verify($plainPassword, $stored)) {
+						$authenticated = true;
+						// Rehash if needed
+						if (password_needs_rehash($stored, PASSWORD_DEFAULT)) {
+							$newHash = password_hash($plainPassword, PASSWORD_DEFAULT);
+							mysqli_query($koneksi, "UPDATE tb_pengguna SET password='".mysqli_real_escape_string($koneksi,$newHash)."' WHERE id_pengguna='".$data_login["id_pengguna"]."'");
+						}
+					}
+				} else {
+					// Backward compatibility: legacy MD5 or plaintext
+					if ($stored === md5($plainPassword) || $stored === $plainPassword) {
+						$authenticated = true;
+						// Upgrade to password_hash immediately
+						$newHash = password_hash($plainPassword, PASSWORD_DEFAULT);
+						mysqli_query($koneksi, "UPDATE tb_pengguna SET password='".mysqli_real_escape_string($koneksi,$newHash)."' WHERE id_pengguna='".$data_login["id_pengguna"]."'");
+					}
+				}
+
+				if ($authenticated) {
+				  session_start();
+				  $_SESSION["ses_id"]=$data_login["id_pengguna"];
+				  $_SESSION["ses_nama"]=$data_login["nama_pengguna"];
+				  $_SESSION["ses_username"]=$data_login["username"];
+				  $_SESSION["ses_password"]=$data_login["password"];
+				  $_SESSION["ses_level"]=$data_login["level"];
                 
-              echo "<script>
-                    Swal.fire({title: 'Login Berhasil',
-						text: '',
-						icon: 'success',
-						confirmButtonText: 'OK'
-                    }).then((result) => {
-                        if (result.value) {
-                            window.location = 'dashboard.php';
-                        }
-                    })</script>";
-              }else{
-              echo "<script>
-                    Swal.fire({title: 'Login Gagal',
-						text: '',
-						icon: 'error',
-						confirmButtonText: 'OK'
-                    }).then((result) => {
-                        if (result.value) {
-                            window.location = 'login.php';
-                        }
-                    })</script>";
-                }
-			  }
+				  echo "<script>
+						Swal.fire({title: 'Login Berhasil',
+						\ttext: '',
+						\ticon: 'success',
+						\tconfirmButtonText: 'OK'
+						}).then((result) => {
+							if (result.value) {
+								window.location = 'dashboard.php';
+							}
+						})</script>";
+				} else {
+				  echo "<script>
+						Swal.fire({title: 'Login Gagal',
+						\ttext: '',
+						\ticon: 'error',
+						\tconfirmButtonText: 'OK'
+						}).then((result) => {
+							if (result.value) {
+								window.location = 'login.php';
+							}
+						})</script>";
+				}
+			}
+		}
+?>
